@@ -1,0 +1,28 @@
+version: '3'
+services:
+  db:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_DATABASE=profile
+      - MYSQL_HOST=db
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+  web-app:
+    image: my-app:1.0
+    ports:
+      - 8000:8000
+    environment:
+      - DJANGO_SUPERUSER_USERNAME=prarit
+      - DJANGO_SUPERUSER_PASSWORD=admin@123
+      - DJANGO_SUPERUSER_EMAIL=prarit38@gmail.com 
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    restart: always
+    command: bash -c "python manage.py migrate && python manage.py createsuperuser --noinput  && python manage.py runserver 0.0.0.0:8000"
+
+
